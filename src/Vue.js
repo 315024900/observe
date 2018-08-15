@@ -2,8 +2,12 @@ import {htmlToVNode} from "./htmlToNode";
 import {Observer} from "./Observer";
 
 export class Vue {
-    constructor({el, data}) {
-        let ObData = new Observer(data)
-        document.body.appendChild(htmlToVNode(el, ObData))
+    constructor({el, template, data, methods}) {
+        let ObData = Observer(Object.assign(data, methods))
+        setTimeout(function () {
+            ObData.red = '#7ef75d'
+        }, 2000)
+        document.querySelector(el).appendChild(htmlToVNode(template, ObData))
     }
+
 }
