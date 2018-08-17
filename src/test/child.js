@@ -1,13 +1,15 @@
-import Vue from './core/Vue';
+import Vue from '../core/Vue';
 
-const template = `<div style="color:{{red}}" @mouseover="setColor()" @click="setMessage('变了哦')">
-<div>点击一下  看效果，滑动一下看效果</div>
-<input @input="setMessage($event.target.value)">
-  {{ message }}
+const template = `<div>
+<div>
+我是子元素
+</div>
+<input >
+父元素的值  {{ message }}
 </div>`;
 /* eslint-disable-next-line no-unused-vars */
 const app = new Vue({
-    el: 'body',
+
     template,
     data: {
         message: 'Hello Vue!',
