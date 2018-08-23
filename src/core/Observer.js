@@ -12,6 +12,7 @@ export default function Observer(data) {
   const obj = new Proxy(data, {
     ...Reflect,
     get(target, key, receiver) {
+      console.log(key);
       if (key === '$Observer') {
         return $Observer;
       }
