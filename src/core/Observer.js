@@ -1,18 +1,29 @@
 export default function Observer(data) {
   const ObEvent = {};
 
+
   function $Observer(name, action) {
     if (ObEvent[name]) {
       ObEvent[name].push(action);
     } else {
       ObEvent[name] = [action];
     }
+    return function () {
+      const index = ObEvent[name].indexOf(action);
+      ObEvent[name].splice(index, 1);
+      if (ObEvent[name].length === 0) {
+        delete ObEvent[name];
+      }
+    };
   }
+
+    function  $ObserverMore(names,action){
+
+    }
 
   const obj = new Proxy(data, {
     ...Reflect,
     get(target, key, receiver) {
-      console.log(key);
       if (key === '$Observer') {
         return $Observer;
       }
