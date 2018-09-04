@@ -1,28 +1,62 @@
-function expandValue(value, addPreString, ObData) {
+function expandValue(value, addPreString = '$ObData', ObData) {
+  const keys = [];
+  if (!value) {
+    return value;
+  }
+  console.log(value);
   const theValue = value.replace(/\s|^|\([A-Za-z0-9_$$]+/g, (key) => {
     if (ObData[key]) {
-      return `ObData.${key}`;
+      keys.push(key);
+      return `${addPreString}.${key}`;
     }
     return key;
   });
-  return theValue;
+  console.log(theValue)
+  return {
+    keys,
+    result: `return ${theValue}`,
+  };
+}
+
+/**
+ * 监控某些参数，让他们会触发某个方法，无论变回参数的值变回多少次，但是这个方法一个周期只会执行一次
+ * @param names
+ * @param action
+ * @param ObData
+ */
+
+function observerMore(names, action, ObData, immediate) {
+  const cancelActions = [];
+  let timeId;
+  const lazyAction = () => {
+    clearTimeout(timeId);
+    timeId = setTimeout(() => {
+      action();
+    });
+  };
+  if (immediate) {
+    lazyAction();
+  }
+  names.forEach((name) => {
+    const one = ObData.$Observer(name, lazyAction);
+    cancelActions.push(one);
+  });
 }
 
 function createVNode(tag, { on, attrs }, children, ObData) {
   const ele = document.createElement(tag);
-  // if (style) {
-  //   if (/(\{\{)\w+(\}\})/.test(style)) {
-  //     const matche = style.match(/(\{\{)\w+(\}\})/)[0].replace('{{', '').replace('}}', '').trim();
-  //     ObData.$Observer(matche, () => {
-  //       ele.setAttribute('style', style.replace(/(\{\{)\w+(\}\})/g, ObData[matche]));
-  //     });
-  //     ele.setAttribute('style', style.replace(/(\{\{)\w+(\}\})/g, ObData[matche]));
-  //   } else {
-  //     ele.setAttribute('style', style);
-  //   }
-  // }
-  Object.keys(attrs).forEach((key) => {
-      ele.setAttribute('style', style.replace(/(\{\{)\w+(\}\})/g, ObData[matche]));
+  attrs.forEach((obj) => {
+    if (!(/^:/.test(obj.name))) {
+      ele.setAttribute(obj.name, obj.value);
+      return;
+    }
+    if (obj.value !== 0 && !obj.value) {
+      return;
+    }
+    const { keys, result } = expandValue(obj.value, '$Obdata', ObData);
+    /* eslint-disable-next-line no-new-func */
+    const meth = new Function('$ObData', result);
+    observerMore(keys, () => ele.setAttribute(obj.name, meth(ObData)), ObData, true);
   });
 
   Object.keys(on).forEach((key) => {
@@ -31,12 +65,14 @@ function createVNode(tag, { on, attrs }, children, ObData) {
   children.forEach((child) => {
     if (typeof child === 'string') {
       const text = document.createTextNode(child);
-      if (/\{\{\s*(\w+)\s*\}\}/.test(child)) {
-        const matche = child.match(/\{\{\s*(\w+)\s*\}\}/)[1];
-        ObData.$Observer(matche, () => {
-          text.nodeValue = child.replace(/\{\{\s*(\w+)\s*\}\}/g, ObData[matche]);
-        });
-        text.nodeValue = child.replace(/\{\{\s*(\w+)\s*\}\}/g, ObData[matche]);
+      if (/\{\{(.*)\}\}/.test(child)) {
+        const matche = child.match(/\{\{(.*)\}\}/)[1];
+        const { keys, result } = expandValue(matche, '$Obdata', ObData);
+        /* eslint-disable-next-line no-new-func */
+        const meth = new Function('$ObData', result);
+        observerMore(keys, () => {
+          text.nodeValue = meth(ObData);
+        }, ObData, true);
       }
       ele.appendChild(text);
     } else if (typeof child === 'object') {
@@ -51,9 +87,9 @@ function getOn(element, ObData) {
   const atts = [...element.attributes];
   const ons = {};
   atts.filter(obj => obj.name[0] === '@').forEach((obj) => {
-    const theValue = expandValue(obj.value, 'ObData', ObData);
+    const theValue = expandValue(obj.value, 'ObData', ObData).result;
     /* eslint-disable-next-line no-new-func */
-    const meth = new Function('$event,ObData', theValue);
+    const meth = new Function('$event,$ObData', theValue);
     ons[obj.name.replace('@', '')] = function (e) {
       const $event = {};
       ['type', 'target'].forEach((key) => {
@@ -73,7 +109,10 @@ function htmlToVNode(html, ObData) {
     elment.tagName.toLowerCase(),
     {
       // 正常的 HTML 特性
-      attrs: Array.from(elment.attributes).map(obj => ({ name: obj.name, value: obj.vulue })),
+      attrs: Array.from(elment.attributes).filter(obj => !(/^@/.test(obj.name))).map(obj => ({
+        name: obj.name,
+        value: obj.vulue,
+      })),
       on: getOn(elment, ObData),
     }, [].slice.call(elment.childNodes).map((child) => {
       if (child.nodeName === '#text') {

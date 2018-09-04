@@ -1,6 +1,6 @@
 import Vue from './core/Vue';
 
-const template = `<div style="color:{{red}}" @mouseover="setColor()" @click="setMessage('变了哦')">
+const template = `<div style="color:red" @mouseover="setColor()" @click="setMessage('变了哦')">
 <div>点击一下  看效果，滑动一下看效果</div>
 <input @input="setMessage($event.target.value)">
   {{ message }}

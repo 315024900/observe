@@ -17,9 +17,25 @@ export default function Observer(data) {
     };
   }
 
-    function  $ObserverMore(names,action){
-
-    }
+  /**
+     * 监控某些参数，让他们会触发某个方法，无论变回参数的值变回多少次，但是这个方法一个周期只会执行一次
+     * @param names
+     * @param action
+     */
+  function $ObserverMore(names, action) {
+    const cancelActions = [];
+    let timeId;
+    const lazyAction = () => {
+      clearTimeout(timeId);
+      timeId = setTimeout(() => {
+        action();
+      });
+    };
+    names.forEach((name) => {
+      const one = $Observer(name, lazyAction);
+      cancelActions.push(one);
+    });
+  }
 
   const obj = new Proxy(data, {
     ...Reflect,
