@@ -1,20 +1,22 @@
-function expandValue(value, addPreString = '$ObData', ObData) {
+function expandValue({ value, addPreString = '$ObData', ObData = {} } = {}) {
   const keys = [];
   if (!value) {
     return value;
   }
-  console.log(value);
-  const theValue = value.replace(/\s|^|\([A-Za-z0-9_$$]+/g, (key) => {
-    if (ObData[key]) {
-      keys.push(key);
-      return `${addPreString}.${key}`;
+  const theValue = value.replace(/(\s|^|\(|\+|-)([A-Za-z0-9_$$]+)/g, (key) => {
+    const theKey = key.match(/([A-Za-z0-9_$$]+)/)[0];
+    console.log(theKey, key, 323, ObData);
+
+    if (ObData[theKey]) {
+      keys.push(theKey);
+      return `${addPreString}.${theKey}`;
     }
     return key;
   });
-  console.log(theValue)
+  console.log(theValue,111)
   return {
     keys,
-    result: `return ${theValue}`,
+    result: `return ( ${theValue} )`,
   };
 }
 
@@ -53,7 +55,7 @@ function createVNode(tag, { on, attrs }, children, ObData) {
     if (obj.value !== 0 && !obj.value) {
       return;
     }
-    const { keys, result } = expandValue(obj.value, '$Obdata', ObData);
+    const { keys, result } = expandValue({ value: obj.value, ObData });
     /* eslint-disable-next-line no-new-func */
     const meth = new Function('$ObData', result);
     observerMore(keys, () => ele.setAttribute(obj.name, meth(ObData)), ObData, true);
@@ -67,7 +69,7 @@ function createVNode(tag, { on, attrs }, children, ObData) {
       const text = document.createTextNode(child);
       if (/\{\{(.*)\}\}/.test(child)) {
         const matche = child.match(/\{\{(.*)\}\}/)[1];
-        const { keys, result } = expandValue(matche, '$Obdata', ObData);
+        const { keys, result } = expandValue({ value: matche, ObData });
         /* eslint-disable-next-line no-new-func */
         const meth = new Function('$ObData', result);
         observerMore(keys, () => {
@@ -87,7 +89,7 @@ function getOn(element, ObData) {
   const atts = [...element.attributes];
   const ons = {};
   atts.filter(obj => obj.name[0] === '@').forEach((obj) => {
-    const theValue = expandValue(obj.value, 'ObData', ObData).result;
+    const theValue = expandValue({ value: obj.value, ObData }).result;
     /* eslint-disable-next-line no-new-func */
     const meth = new Function('$event,$ObData', theValue);
     ons[obj.name.replace('@', '')] = function (e) {
