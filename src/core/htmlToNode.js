@@ -13,7 +13,7 @@ function expandValue({ value, addPreString = '$ObData', ObData = {} } = {}) {
     }
     return key;
   });
-  console.log(theValue,111)
+  console.log(theValue, 111);
   return {
     keys,
     result: `return ( ${theValue} )`,
