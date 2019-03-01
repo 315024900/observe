@@ -10,7 +10,7 @@
 4. vue的{{}}}参数绑定。  
 5. 精简的Observer系统，变量改变，自动更新html。  
  
-## [点我查看效果](https://315024900.github.io/observ/dist/)
+## [点我查看效果](https://315024900.github.io/observe/dist/)
  
 
 ## License
