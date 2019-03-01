@@ -37,6 +37,7 @@ function getOn(element, ObData) {
   const atts = [...element.attributes];
   const ons = {};
   atts.filter(obj => obj.name[0] === '@').forEach((obj) => {
+    /* eslint-disable-next-line */
     ons[obj.name.replace('@', '')] = function () {
       /* eslint-disable-next-line no-new-func */
       new Function(Object.keys(ObData).join(','), obj.value)(...Object.keys(ObData).map(key => ObData[key]));
