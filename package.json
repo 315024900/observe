@@ -2,6 +2,7 @@
   "name": "mini-vue2",
   "version": "0.1.0",
   "private": true,
+  "description": "100行代码的vue，实现vue的双向绑定，数据Observe，模板编译，帮助你最快速理解vue的设计逻辑。",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
