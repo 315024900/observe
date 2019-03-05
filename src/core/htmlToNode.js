@@ -1,3 +1,12 @@
+/**
+ * 创建dom函数，类似vue的虚拟dom函数
+ * @param tag 标签名 例如  div
+ * @param style 样式的style
+ * @param on 事件
+ * @param children 子元素
+ * @param ObData 注册了监听Observe的数据
+ * @returns {HTMLElement} 返回生成的dom
+ */
 function createVNode(tag, { style, on }, children, ObData) {
   const ele = document.createElement(tag);
   if (style) {
@@ -32,7 +41,11 @@ function createVNode(tag, { style, on }, children, ObData) {
   return ele;
 }
 
-
+/**
+ * 解析DOM上面的事件
+ * @param element 传入的DOM
+ * @param ObData 要绑定到，哪部分的监听数据
+ */
 function getOn(element, ObData) {
   const atts = [...element.attributes];
   const ons = {};
@@ -46,6 +59,13 @@ function getOn(element, ObData) {
   return ons;
 }
 
+
+/**
+ * 将html解析成DOM
+ * @param html 模板
+ * @param ObData  注册了监听Observe的数据
+ * @returns {HTMLElement} 返回DOM
+ */
 function htmlToVNode(html, ObData) {
   const h = createVNode;
   const span = document.createElement('span');

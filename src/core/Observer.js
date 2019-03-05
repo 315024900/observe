@@ -1,3 +1,9 @@
+/**
+ * 数据监听订阅函数
+ * @param data  想要添加监听的数据
+ * @returns {*} 返回代理的对象
+ * @constructor
+ */
 export default function Observer(data) {
   const ObEvent = {};
 
